@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏖️ Asistente Vacaciones Baleares</title>
+<style>
+  :root {
+    --primary: #0077b6;
+    --secondary: #00b4d8;
+    --accent: #ff6b35;
+    --sand: #f4e0b5;
+    --bg: #e8f4f8;
+    --white: #ffffff;
+    --dark: #1a1a2e;
+    --bubble-user: #0077b6;
+    --bubble-bot: #ffffff;
+    --shadow: 0 4px 20px rgba(0,119,182,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(0,180,216,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255,107,53,0.10) 0%, transparent 50%);
+  }
+
+  .chat-container {
+    width: 420px;
+    max-width: 95vw;
+    height: 700px;
+    max-height: 95vh;
+    background: var(--white);
+    border-radius: 24px;
+    box-shadow: var(--shadow), 0 0 0 1px rgba(0,119,182,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .chat-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 20px 24px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .chat-header .avatar {
+    width: 46px; height: 46px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .chat-header .info h2 { font-size: 16px; font-weight: 700; }
+  .chat-header .info p  { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+  .status-dot {
+    width: 8px; height: 8px;
+    background: #4ade80; border-radius: 50%;
+    display: inline-block; margin-right: 5px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── Quick actions ── */
+  .quick-actions {
+    background: var(--sand);
+    padding: 10px 16px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+    border-bottom: 1px solid rgba(0,119,182,0.1);
+  }
+  .quick-btn {
+    background: white; border: 1.5px solid var(--secondary);
+    color: var(--primary); border-radius: 20px;
+    padding: 5px 12px; font-size: 12px; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .quick-btn:hover { background: var(--secondary); color: white; }
+
+  /* ── Messages ── */
+  .messages {
+    flex: 1; overflow-y: auto;
+    padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 4px; }
+
+  .message { display: flex; gap: 8px; max-width: 88%; }
+  .message.user { align-self: flex-end; flex-direction: row-reverse; }
+  .message.bot  { align-self: flex-start; }
+
+  .msg-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white; align-self: flex-end;
+  }
+  .message.user .msg-avatar { background: var(--accent); }
+
+  .bubble {
+    padding: 12px 16px; border-radius: 18px;
+    font-size: 14px; line-height: 1.5;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .message.user .bubble {
+    background: var(--bubble-user); color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .message.bot .bubble {
+    background: var(--bubble-bot); color: var(--dark);
+    border: 1px solid rgba(0,119,182,0.12);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  /* ── Weather card ── */
+  .weather-card {
+    background: linear-gradient(135deg, #0077b6, #00b4d8);
+    color: white; border-radius: 14px;
+    padding: 14px 16px; margin: 4px 0;
+    font-size: 13px;
+  }
+  .weather-card .weather-main {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 28px; margin-bottom: 8px;
+  }
+  .weather-card .weather-detail { opacity: 0.9; line-height: 1.8; }
+
+  /* ── Rec card ── */
+  .rec-card {
+    background: white; border: 1px solid rgba(0,119,182,0.15);
+    border-radius: 12px; padding: 10px 14px; margin: 4px 0;
+    font-size: 13px;
+  }
+  .rec-card .rec-name { font-weight: 700; color: var(--primary); margin-bottom: 3px; }
+  .rec-card .rec-meta { color: #666; font-size: 12px; margin-bottom: 4px; }
+  .rec-card .rec-reason { color: #444; line-height: 1.4; }
+  .rec-score {
+    display: inline-block; background: var(--sand);
+    color: var(--accent); font-weight: 700;
+    border-radius: 8px; padding: 2px 8px; font-size: 11px; float: right;
+  }
+
+  /* ── Typing ── */
+  .typing-indicator {
+    display: flex; gap: 4px; align-items: center;
+    padding: 12px 16px;
+  }
+  .typing-dot {
+    width: 7px; height: 7px; background: var(--secondary);
+    border-radius: 50%; animation: bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+  /* ── Input ── */
+  .input-area {
+    padding: 16px;
+    border-top: 1px solid rgba(0,119,182,0.1);
+    display: flex; gap: 10px; align-items: flex-end;
+    background: #fafcff;
+  }
+  .input-area textarea {
+    flex: 1; border: 1.5px solid rgba(0,119,182,0.25);
+    border-radius: 20px; padding: 10px 16px;
+    font-size: 14px; resize: none; max-height: 120px;
+    font-family: inherit; outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.4;
+  }
+  .input-area textarea:focus { border-color: var(--secondary); }
+  .send-btn {
+    width: 42px; height: 42px; background: var(--primary);
+    border: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .send-btn:hover { background: var(--secondary); transform: scale(1.05); }
+  .send-btn svg { width: 18px; height: 18px; fill: white; }
+
+  .island-selector {
+    background: #f0f8ff; border-bottom: 1px solid rgba(0,119,182,0.1);
+    padding: 8px 16px; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #555;
+  }
+  .island-selector select {
+    border: 1.5px solid var(--secondary); border-radius: 12px;
+    padding: 4px 10px; font-size: 13px; background: white;
+    color: var(--primary); cursor: pointer; outline: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="avatar">🏖️</div>
+    <div class="info">
+      <h2>Asistente Baleares</h2>
+      <p><span class="status-dot"></span>Conectado · Powered by AEMET + IA</p>
+    </div>
+  </div>
+
+  <div class="island-selector">
+    🏝️ Isla:
+    <select id="islandSelect">
+      <option value="mallorca">Mallorca</option>
+      <option value="menorca">Menorca</option>
+      <option value="ibiza">Ibiza</option>
+      <option value="formentera">Formentera</option>
+    </select>
+  </div>
+
+  <div class="quick-actions">
+    <button class="quick-btn" onclick="quickMsg('¿Qué puedo hacer hoy aquí?')">🤔 ¿Qué hacer hoy?</button>
+    <button class="quick-btn" onclick="quickMsg('¿Qué tiempo hace?')">🌤️ El tiempo</button>
+    <button class="quick-btn" onclick="quickMsg('Quiero ir a la playa')">🏊 Playas</button>
+    <button class="quick-btn" onclick="quickMsg('Planes con lluvia')">☔ Si llueve</button>
+    <button class="quick-btn" onclick="quickMsg('Cultura y museos')">🏛️ Cultura</button>
+  </div>
+
+  <div class="messages" id="messages">
+    <!-- Initial message injected by JS -->
+  </div>
+
+  <div class="input-area">
+    <textarea id="userInput" placeholder="Pregunta algo sobre tus vacaciones..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────────
+  // En producción cambiar por el endpoint real de Amazon Lex Runtime V2
+  // o por el webhook de FastAPI que actúa de proxy
+  const API_BASE    = window.location.origin.includes('localhost')
+    ? 'http://localhost:8000'
+    : 'https://TU-FASTAPI-URL';                // ← cambiar en deploy
+
+  const LEX_WEBHOOK = `${API_BASE}/api/lex/webhook`;
+  const REC_API     = `${API_BASE}/api/recommendations/`;
+  const WEATHER_API = `${API_BASE}/api/weather/`;
+
+  let sessionId = 'web-' + Math.random().toString(36).substr(2, 9);
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  window.onload = () => {
+    addBotMessage(
+      '¡Hola! 👋 Soy tu asistente de vacaciones en **Baleares**.\n\n' +
+      'Consulto el tiempo real de AEMET y uso inteligencia artificial para recomendarte ' +
+      'los mejores planes según las condiciones meteorológicas.\n\n' +
+      '¿Qué isla vas a visitar? Selecciónala arriba y pregúntame lo que quieras. 🏝️'
+    );
+  };
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function getIsland() { return document.getElementById('islandSelect').value; }
+
+  function addBotMessage(text, cards = null) {
+    const msgs = document.getElementById('messages');
+    const div  = document.createElement('div');
+    div.className = 'message bot';
+
+    const avatar = `<div class="msg-avatar">🤖</div>`;
+    let content = `<div class="bubble">${formatText(text)}</div>`;
+    if (cards) content += cards;
+    div.innerHTML = avatar + `<div style="display:flex;flex-direction:column;gap:8px">${content}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addUserMessage(text) {
+    const msgs = document.getElementById('messages');
+    const div  = document.createElement('div');
+    div.className = 'message user';
+    div.innerHTML = `<div class="msg-avatar">👤</div><div class="bubble">${escapeHtml(text)}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('messages');
+    const div  = document.createElement('div');
+    div.className = 'message bot'; div.id = 'typing';
+    div.innerHTML = `<div class="msg-avatar">🤖</div>
+      <div class="bubble"><div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div></div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  function formatText(t) {
+    return t
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function quickMsg(text) {
+    document.getElementById('userInput').value = text;
+    sendMessage();
+  }
+
+  // ── Classify intent client-side (fallback si Lex no configurado) ──────────
+  function classifyIntent(text) {
+    const t = text.toLowerCase();
+    if (/tiempo|clima|llueve|lluvia|sol|meteorolog/.test(t)) return 'weather';
+    if (/playa|beach|nadar|baño/.test(t))                    return 'recommend_beach';
+    if (/cultura|museo|monument|castillo|historia/.test(t))  return 'recommend_culture';
+    if (/llueve|lluvia|interior|cubierto/.test(t))           return 'recommend_rainy';
+    if (/qué hacer|plan|recomienda|suger/.test(t))           return 'recommend_all';
+    return 'recommend_all';
+  }
+
+  // ── Main send ─────────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text  = input.value.trim();
+    if (!text) return;
+    input.value = ''; input.style.height = 'auto';
+
+    addUserMessage(text);
+    showTyping();
+
+    const island = getIsland();
+    const intent = classifyIntent(text);
+
+    try {
+      // 1️⃣  Intentar llamar al webhook de Lex / FastAPI
+      const lexBody = {
+        sessionId,
+        inputTranscript: text,
+        sessionState: {
+          intent: {
+            name: intentToLexIntent(intent),
+            slots: {
+              Island:    { value: { interpretedValue: island } },
+              Category:  intent.includes('_') ? { value: { interpretedValue: intent.split('_')[1] } } : null,
+            },
+          },
+          sessionAttributes: {},
+        },
+        interpretations: [],
+      };
+
+      const resp  = await fetch(LEX_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lexBody),
+      });
+
+      hideTyping();
+
+      if (resp.ok) {
+        const data = await resp.json();
+        const msgs = data.messages || [];
+
+        if (msgs.length === 0) {
+          addBotMessage('No recibí respuesta del servidor. ¿Está arrancado el backend?');
+          return;
+        }
+
+        // Renderizar respuestas enriquecidas
+        for (const m of msgs) {
+          if (m.content.includes('Top recomendaciones')) {
+            renderRecommendationMessage(m.content);
+          } else if (m.content.includes('Tiempo actual') || m.content.includes('Simulado')) {
+            renderWeatherMessage(m.content);
+          } else {
+            addBotMessage(m.content);
+          }
+        }
+      } else {
+        // 2️⃣  Fallback: llamar directamente a FastAPI
+        await fallbackToFastAPI(island, intent, text);
+      }
+
+    } catch (err) {
+      hideTyping();
+      console.warn('Backend no disponible:', err.message);
+      addBotMessage(
+        '⚠️ No puedo conectar con el servidor ahora mismo.\n\n' +
+        'Asegúrate de que FastAPI esté arrancado:\n' +
+        '`uvicorn app.main:app --reload`\n\n' +
+        'Puedes preguntar sobre **Mallorca, Menorca, Ibiza** o **Formentera**. 🏝️'
+      );
+    }
+  }
+
+  function intentToLexIntent(intent) {
+    if (intent === 'weather') return 'GetWeatherInfo';
+    if (intent.startsWith('recommend')) return 'GetVacationRecommendations';
+    return 'FallbackIntent';
+  }
+
+  async function fallbackToFastAPI(island, intent, text) {
+    try {
+      if (intent === 'weather') {
+        const w = await fetch(`${WEATHER_API}${island}`).then(r => r.json());
+        renderWeatherCard(w);
+      } else {
+        let category = null;
+        if (intent === 'recommend_beach')   category = 'playa';
+        if (intent === 'recommend_culture') category = 'cultura';
+
+        const body = { island, num_recommendations: 5, ...(category ? {category} : {}) };
+        const data = await fetch(REC_API, {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        }).then(r => r.json());
+
+        renderRecommendations(data);
+      }
+    } catch {
+      addBotMessage('Backend FastAPI no disponible. Arranca el servidor primero.');
+    }
+  }
+
+  // ── Renderers ─────────────────────────────────────────────────────────────
+  function renderWeatherMessage(text) {
+    addBotMessage(text);
+  }
+
+  function renderRecommendationMessage(text) {
+    addBotMessage(text);
+  }
+
+  function renderWeatherCard(w) {
+    const emojis = {
+      soleado:'☀️', parcialmente_nublado:'⛅', nublado:'☁️',
+      ventoso:'💨', lluvioso:'🌧️', tormentoso:'⛈️'
+    };
+    const e = emojis[w.condition] || '🌤️';
+    const card = `<div class="weather-card">
+      <div class="weather-main">${e} <span>${w.temperature}°C</span></div>
+      <div class="weather-detail">
+        ${w.description}<br>
+        💧 Humedad: ${w.humidity}% · 💨 Viento: ${w.wind_speed} km/h
+      </div>
+    </div>`;
+    addBotMessage(`Tiempo actual en ${w.island}:`, card);
+  }
+
+  function renderRecommendations(data) {
+    if (!data.recommendations) { addBotMessage('Sin recomendaciones disponibles.'); return; }
+
+    const w = data.weather;
+    renderWeatherCard(w);
+
+    let cards = '';
+    data.recommendations.forEach((r, i) => {
+      const stars = '⭐'.repeat(Math.round(r.place.google_rating || 4));
+      const score = Math.round(r.score * 100);
+      cards += `<div class="rec-card">
+        <div class="rec-name">${i+1}. ${r.place.name}
+          <span class="rec-score">${score}% match</span>
+        </div>
+        <div class="rec-meta">${r.place.category} · ${stars}</div>
+        <div class="rec-reason">${r.reason}</div>
+      </div>`;
+    });
+
+    addBotMessage(`🏝️ Mis recomendaciones para ${data.island}:`, cards);
+  }
+</script>
+</body>
+</html>
