@@ -1,22 +1,20 @@
 version: '3.9'
 services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - AEMET_API_KEY=${AEMET_API_KEY}
-      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-    volumes:
-      - ./app/data:/app/app/data   # persistir places.json entre reinicios
-    restart: unless-stopped
+  # api:
+  #   build: .
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - AEMET_API_KEY=${AEMET_API_KEY}
+  #     - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+  #   volumes:
+  #     - ./app/data:/app/app/data   # persistir places.json entre reinicios
+  #   restart: unless-stopped
 
   chatbot:
     image: nginx:alpine
     ports:
-      - "80:80"
+      - "808:808"
     volumes:
       - ./chatbot:/usr/share/nginx/html:ro
-    depends_on:
-      - api
     restart: unless-stopped

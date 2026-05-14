@@ -250,9 +250,7 @@
   // ── Config ──────────────────────────────────────────────────────────────────
   // En producción cambiar por el endpoint real de Amazon Lex Runtime V2
   // o por el webhook de FastAPI que actúa de proxy
-  const API_BASE    = window.location.origin.includes('localhost')
-    ? 'http://localhost:8000'
-    : 'https://TU-FASTAPI-URL';                // ← cambiar en deploy
+  const API_BASE = "http://127.0.0.1:8000";               // ← cambiar en deploy
 
   const LEX_WEBHOOK = `${API_BASE}/api/lex/webhook`;
   const REC_API     = `${API_BASE}/api/recommendations/`;

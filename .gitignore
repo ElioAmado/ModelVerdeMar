@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# CPython stuff
+bin/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments (Entornos virtuales)
+.venv/
+venv/
+ENV/
+env/
+pythonenv/
+
+# Variables de entorno (¡Muy importante!)
+.env
+.flaskenv
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# IDEs (VS Code, PyCharm)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Databases (si usas SQLite local)
+*.sqlite3
+*.db
+
+# OS Files
+.DS_Store
+Thumbs.db

@@ -1,4 +1,4 @@
-Set-Content app\routes\lex_webhook.py @'
+
 from fastapi import APIRouter, Request
 from app.models.schemas import (
     LexWebhookRequest, Island, ActivityCategory
@@ -167,4 +167,3 @@ async def lex_webhook(request: Request, body: LexWebhookRequest):
         "¿Qué isla te interesa? 🌴"
     )
     return _make_response(session_state_base, [help_msg])
-'@
